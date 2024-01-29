@@ -105,7 +105,7 @@ for file_path in app.tk.splitlist(file_paths):
         tc_dict_instance[tc_id] = outcome
 
         # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
-        date_tc_outcome_dict[date] = tc_dict_instance
+        date_tc_outcome_dict[date] = tc_dict_instance.copy()
 
         app.text.insert(tk.END, f"TestCaseID: {tc_id}, Outcome: {outcome}\n")
         #output an outcome count table
@@ -133,8 +133,8 @@ for file_path in app.tk.splitlist(file_paths):
 
     try:
         # Save the outcome dataframe to a CSV file
-        outcome_df.to_csv('outcome_counts.csv', index_label='Date')
-        
+        outcome_df.to_csv(output_file_path, index_label='Date')
+        history_worksheet.to_csv('history_worksheet.csv', index=False)
 
         # Create a simple pop-up window that confirms the completion of the task
         messagebox.showinfo("Confirmation", "The task has been completed successfully!")
