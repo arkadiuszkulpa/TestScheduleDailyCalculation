@@ -69,9 +69,6 @@ for file_path in app.tk.splitlist(file_paths):
     # Generate all dates between the start and finish dates
     project_dates = pd.date_range(start_date, finish_date)
 
-    # Convert project_dates to a dictionary structure
-    project_dates_dict = {date: {} for date in project_dates}
-
 
 
     # Load the 'Relationship Download' sheet
@@ -80,24 +77,65 @@ for file_path in app.tk.splitlist(file_paths):
     # Filter the 'ID' column by 'Test Case' in the 'Work Item Type' column
     all_tcs = relationship_download[relationship_download['Work Item Type'] == 'Test Case']
 
-    tc_dict = all_tcs.set_index('ID')['Outcome'].to_dict()
+    all_tcs['ID'] = all_tcs['ID'].astype(int)
+    all_tcs = all_tcs[['ID', 'Outcome']]
+
+
+    tc_dict = all_tcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
     
     outcome_set = {"Active", "NotApplicable", "Blocked", "Failed", "Passed"}
     project_outcomes = []
 
-    
+    date_tc_outcome_dict = {}
 
+    for date in project_dates:
+        date_tc_outcome_dict[date] = tc_dict
 
-    print("print: history worksheet filtered columns \n \n")
-    print(history_worksheet)
-    print("print: dates dictionary \n \n")
-    print(project_dates_dict)
-    print("print: all test cases dictionary \n \n")
-    print(all_tcs)
+# Take an instance of the tc_dict, then for each row of history_worksheet, find the corresponding date in date_tc_outcome_dict and the corresponding ID dictionary within it, then update the tc_dict instance then replace date_tc_outcome_dict's tc_dict with the instanced tc_dict and move onto next row of history_worksheet. 
+        
+# Create an instance of tc_dict
+    tc_dict_instance = tc_dict.copy()
+
+    for index, row in history_worksheet.iterrows():
+        date = row['Date']
+        tc_id = row['TestCaseID']
+        outcome = row['Outcome']
+
+        # Update the tc_dict instance
+        tc_dict_instance[tc_id] = outcome
+
+        # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
+        date_tc_outcome_dict[date] = tc_dict_instance
+
+        app.text.insert(tk.END, f"TestCaseID: {tc_id}, Outcome: {outcome}\n")
+        #output an outcome count table
+        outcome_counts = {}
+
+        for date in date_tc_outcome_dict:
+            outcome_counts[date] = {outcome: 0 for outcome in outcome_set}
+
+            for tc_id, outcome in date_tc_outcome_dict[date].items():
+                if outcome in outcome_set:
+                    outcome_counts[date][outcome] += 1
+
+    outcome_df = pd.DataFrame(outcome_counts).T
+
+    # print("print: history worksheet filtered columns \n \n")
+    # print(history_worksheet)
+    # print("print: dates dictionary \n \n")
+    # print(project_dates)
+    # print("print: all test cases dictionary \n \n")
+    # print(tc_dict)
+    print("print: all test cases and dates dictionary \n \n")
+    print(date_tc_outcome_dict)
+    print("print: specific date of the dictionary")
+    print(date_tc_outcome_dict[project_dates[0]])
 
     try:
-        # Save history_worksheet to a CSV file
-        history_worksheet.to_csv(output_file_path, index=False)
+        # Save the outcome dataframe to a CSV file
+        outcome_df.to_csv('outcome_counts.csv', index_label='Date')
+        
+
         # Create a simple pop-up window that confirms the completion of the task
         messagebox.showinfo("Confirmation", "The task has been completed successfully!")
         app.destroy()  # Destroy the main window
