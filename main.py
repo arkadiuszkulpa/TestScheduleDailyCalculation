@@ -126,15 +126,15 @@ for file_path in app.tk.splitlist(file_paths):
     # print(project_dates)
     # print("print: all test cases dictionary \n \n")
     # print(tc_dict)
-    print("print: all test cases and dates dictionary \n \n")
-    print(date_tc_outcome_dict)
-    print("print: specific date of the dictionary")
-    print(date_tc_outcome_dict[project_dates[0]])
+    # print("print: all test cases and dates dictionary \n \n")
+    # print(date_tc_outcome_dict)
+    # print("print: specific date of the dictionary")
+    # print(date_tc_outcome_dict[project_dates[0]])
 
     try:
         # Save the outcome dataframe to a CSV file
         outcome_df.to_csv(output_file_path, index_label='Date')
-        history_worksheet.to_csv('history_worksheet.csv', index=False)
+        #history_worksheet.to_csv('history_worksheet.csv', index=False)
 
         # Create a simple pop-up window that confirms the completion of the task
         messagebox.showinfo("Confirmation", "The task has been completed successfully!")
