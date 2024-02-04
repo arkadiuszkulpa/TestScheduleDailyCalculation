@@ -32,6 +32,12 @@ class Application(tk.Tk):
         self.update_image()
 
     def update_image(self):
+        if not self.frames:
+            print("Error: No frames loaded")
+            return
+        if self.frame_index >= len(self.frames):
+            print(f"Error: Frame index {self.frame_index} out of range")
+            return
         self.current_frame = self.frames[self.frame_index]
         self.frame_index = (self.frame_index + 1) % len(self.frames)
         self.label.configure(image=self.current_frame)

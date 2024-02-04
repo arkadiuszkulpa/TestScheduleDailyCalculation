@@ -1,14 +1,23 @@
 import os
+import sys
+
+from tkinter import filedialog, messagebox, Toplevel
 
 import pandas as pd
 import tkinter as tk
 
-from tkinter import filedialog, messagebox, Toplevel
-
 from application import Application
 
-# Path to the GIF file
-gif_path = 'math.gif'
+# Check if we're running as a packaged executable
+if getattr(sys, 'frozen', False):
+    # We're running as a packaged executable
+    application_path = sys._MEIPASS
+else:
+    # We're running as a normal Python script
+    application_path = os.path.dirname(os.path.abspath(__file__))
+
+# Build the full path to the GIF file
+gif_path = os.path.join(application_path, 'math.gif')
 
 # Create an instance of Application
 app = Application(gif_path)
@@ -22,7 +31,32 @@ else:
     app.text.insert(tk.END, "Processing files...\n")
     app.text.update()
 
+def process_outcomes():
+    """calculate daily outcomes for each day and save a sum of outcomes for each day separately"""
+    # Create an instance of tc_dict
+    tc_dict_instance = tc_dict.copy()
 
+    for index, row in history_worksheet.iterrows():
+        date = row['Date']
+        tc_id = row['TestCaseID']
+        outcome = row['Outcome']
+
+        # Update the tc_dict instance
+        tc_dict_instance[tc_id] = outcome
+
+        # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
+        date_tc_outcome_dict[date] = tc_dict_instance.copy()
+
+    #output an outcome count table
+    result_dict = {}
+
+    for date in date_tc_outcome_dict:
+        result_dict[date] = {outcome: 0 for outcome in outcome_set}
+
+        for tc_id, outcome in date_tc_outcome_dict[date].items():
+            if outcome in outcome_set:
+                result_dict[date][outcome] += 1
+    return result_dict
 
 for file_path in app.tk.splitlist(file_paths):
 
@@ -90,46 +124,24 @@ for file_path in app.tk.splitlist(file_paths):
 
     for date in project_dates:
         date_tc_outcome_dict[date] = tc_dict
+    
+    outcome_df = pd.DataFrame(process_outcomes()).T
 
-# Take an instance of the tc_dict, then for each row of history_worksheet, find the corresponding date in date_tc_outcome_dict and the corresponding ID dictionary within it, then update the tc_dict instance then replace date_tc_outcome_dict's tc_dict with the instanced tc_dict and move onto next row of history_worksheet. 
-        
-# Create an instance of tc_dict
-    tc_dict_instance = tc_dict.copy()
+    # TODO : Implement Team's sharepoint connectivity
+    # TODO : Validate which columns get created first in the outcome_df
+    # TODO : organize the analyzer around actual project dates so that empty execution dates are saved correctly using previous day's data
+    
 
-    for index, row in history_worksheet.iterrows():
-        date = row['Date']
-        tc_id = row['TestCaseID']
-        outcome = row['Outcome']
-
-        # Update the tc_dict instance
-        tc_dict_instance[tc_id] = outcome
-
-        # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
-        date_tc_outcome_dict[date] = tc_dict_instance.copy()
-
-        app.text.insert(tk.END, f"TestCaseID: {tc_id}, Outcome: {outcome}\n")
-        #output an outcome count table
-        outcome_counts = {}
-
-        for date in date_tc_outcome_dict:
-            outcome_counts[date] = {outcome: 0 for outcome in outcome_set}
-
-            for tc_id, outcome in date_tc_outcome_dict[date].items():
-                if outcome in outcome_set:
-                    outcome_counts[date][outcome] += 1
-
-    outcome_df = pd.DataFrame(outcome_counts).T
-
-    # print("print: history worksheet filtered columns \n \n")
-    # print(history_worksheet)
-    # print("print: dates dictionary \n \n")
-    # print(project_dates)
-    # print("print: all test cases dictionary \n \n")
-    # print(tc_dict)
-    # print("print: all test cases and dates dictionary \n \n")
-    # print(date_tc_outcome_dict)
-    # print("print: specific date of the dictionary")
-    # print(date_tc_outcome_dict[project_dates[0]])
+    print("print: dates dictionary \n \n")
+    print(project_dates)
+    print("print: all test cases dictionary \n \n")
+    print(tc_dict)
+    print("print: all test cases and dates dictionary \n \n")
+    print(date_tc_outcome_dict)
+    print("print: specific date of the dictionary")
+    print(date_tc_outcome_dict[project_dates[0]])
+    print("print: result dict \n \n")
+    print(outcome_df)
 
     try:
         # Save the outcome dataframe to a CSV file
