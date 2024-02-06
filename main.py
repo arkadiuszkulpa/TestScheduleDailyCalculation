@@ -8,6 +8,8 @@ import tkinter as tk
 
 from application import Application
 
+from analyzer import Analyzer
+
 #Check if running Executable or Python Script
 application_path = util.CheckExecutable()
 
@@ -57,12 +59,10 @@ for file_path in app.tk.splitlist(file_paths):
     output_file_name = os.path.splitext(base_name)[0] + ' - Daily Outcomes.csv'
     output_file_path = os.path.join(dir_name, output_file_name)
 
-    # Load the workbook
-    history_worksheet = pd.read_excel(file_path, sheet_name='History_Worksheet', engine='openpyxl')
-
-    # Convert the date column to datetime
-    history_worksheet['Date'] = pd.to_datetime(history_worksheet['Date'])
-
+    analyzer = Analyzer(file_path, "History_Worksheet")
+    analyzer.convert_date_to_datetime()
+    history_worksheet = analyzer.history
+    
     # Simplify the History_worksheet dataset to contain only Date, Outcome, Test Case ID
     history_worksheet = history_worksheet.rename(columns={
         'SpecificRuns1WeekOutcome.Outcome.Column1.outcome': 'Outcome',
