@@ -1,5 +1,5 @@
+import util
 import os
-import sys
 
 from tkinter import filedialog, messagebox, Toplevel
 
@@ -8,13 +8,8 @@ import tkinter as tk
 
 from application import Application
 
-# Check if we're running as a packaged executable
-if getattr(sys, 'frozen', False):
-    # We're running as a packaged executable
-    application_path = sys._MEIPASS
-else:
-    # We're running as a normal Python script
-    application_path = os.path.dirname(os.path.abspath(__file__))
+#Check if running Executable or Python Script
+application_path = util.CheckExecutable()
 
 # Build the full path to the GIF file
 gif_path = os.path.join(application_path, 'math.gif')
@@ -23,13 +18,7 @@ gif_path = os.path.join(application_path, 'math.gif')
 app = Application(gif_path)
 
 # Open a file dialog for the user to select a file
-file_paths = filedialog.askopenfilenames()
-if not file_paths:
-    messagebox.showinfo("No file selected", "You did not select a file.")
-else:
-    # Create a Toplevel window
-    app.text.insert(tk.END, "Processing files...\n")
-    app.text.update()
+file_paths = app.open_files()
 
 def process_outcomes():
     """calculate daily outcomes for each day and save a sum of outcomes for each day separately"""

@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import filedialog, messagebox, Toplevel
 
 class Application(tk.Tk):
     """define window background image as gif"""
@@ -32,6 +33,7 @@ class Application(tk.Tk):
         self.update_image()
 
     def update_image(self):
+        """Update the gif image displayed in app"""
         if not self.frames:
             print("Error: No frames loaded")
             return
@@ -42,3 +44,17 @@ class Application(tk.Tk):
         self.frame_index = (self.frame_index + 1) % len(self.frames)
         self.label.configure(image=self.current_frame)
         self.after(20, self.update_image)  # Increase the delay to 100 milliseconds
+
+    def open_files(self):
+        """Select Files from User Input"""
+        # Open a file dialog for the user to select a file
+        file_paths = filedialog.askopenfilenames()
+        if not file_paths:
+            messagebox.showinfo("No file selected", "You did not select a file.")
+            exit()
+        else:
+            self.text.insert(tk.END, "Processing files...\n")
+            self.text.update()
+            return file_paths
+
+
