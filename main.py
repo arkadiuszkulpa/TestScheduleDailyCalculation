@@ -90,7 +90,8 @@ for file_path in app.tk.splitlist(file_paths):
 
     tc_dict = analyzer.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
     
-    outcome_set = {"Active", "NotApplicable", "Blocked", "Failed", "Passed"}
+    outcome_set = sorted(list({"Active", "NotApplicable", "Blocked", "Failed", "Passed"}))
+
     project_outcomes = []
 
     date_tc_outcome_dict = {}
