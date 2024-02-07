@@ -7,8 +7,17 @@ class Analyzer():
     def __init__(self, filePath, history_worksheet_name,):
         """initialize with history_Worksheet"""
         self.file_path = filePath
-        self.history = pd.read_excel(filePath, sheet_name=history_worksheet_name, engine='openpyxl')
+        self.history = pd.read_excel(filePath, 
+        sheet_name=history_worksheet_name, engine='openpyxl')
+        self.project_dates = []
 
+    def trim_data(self):
+        """Trim to only required columns, perform after rename"""
+        self.history = self.history[[
+            'Date',
+            'Outcome',
+            'TestCaseID'
+        ]]
 
     def convert_date_to_datetime(self, date_column):
         """Convert date to datetime format"""
@@ -26,8 +35,18 @@ class Analyzer():
                 old_name: new_name
             })
         
-    def standardize_testcaseid(self):
+    def standardize_columns(self):
         """Standardize Test Case ID"""
         self.history['TestCaseID'] = pd.to_numeric(self.history['TestCaseID'], errors='coerce')
         self.history = self.history.dropna(subset=['TestCaseID'])
         self.history['TestCaseID'] = self.history['TestCaseID'].astype(int)
+        self.history['Outcome'] = self.history['Outcome'].fillna('Active')
+        
+    def generate_project_dates(self):
+        """Generates a list range of dates from min max of the entries in history_worksheet"""
+        # Calculate the start and finish dates
+        start_date = self.history['Date'].min()
+        finish_date = self.history['Date'].max()
+
+        # Generate all dates between the start and finish dates
+        self.project_dates = pd.date_range(start_date, finish_date)

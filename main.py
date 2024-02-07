@@ -71,26 +71,12 @@ for file_path in app.tk.splitlist(file_paths):
     analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.testCase.id', 'TestCaseID')
 
     #Standardize Test Case ID Column
-    analyzer.standardize_testcaseid()
+    analyzer.standardize_columns()
+    analyzer.trim_data()
+    analyzer.generate_project_dates()
 
     #Temp assignment for ongoing changes to OOP
     history_worksheet = analyzer.history
-
-    history_worksheet['Outcome'] = history_worksheet['Outcome'].fillna('Active')
-
-    history_worksheet = history_worksheet[[
-        'Date',
-        'Outcome', 
-        'TestCaseID']]
-    
-    # Calculate the start and finish dates
-    start_date = history_worksheet['Date'].min()
-    finish_date = history_worksheet['Date'].max()
-
-    # Generate all dates between the start and finish dates
-    project_dates = pd.date_range(start_date, finish_date)
-
-
 
     # Load the 'Relationship Download' sheet
     relationship_download = pd.read_excel(file_path, sheet_name='Relationship Download', engine='openpyxl')
@@ -109,7 +95,7 @@ for file_path in app.tk.splitlist(file_paths):
 
     date_tc_outcome_dict = {}
 
-    for date in project_dates:
+    for date in analyzer.project_dates:
         date_tc_outcome_dict[date] = tc_dict
     
     outcome_df = pd.DataFrame(process_outcomes()).T
@@ -120,13 +106,13 @@ for file_path in app.tk.splitlist(file_paths):
     
 
     print("print: dates dictionary \n \n")
-    print(project_dates)
+    print(analyzer.project_dates)
     print("print: all test cases dictionary \n \n")
     print(tc_dict)
     print("print: all test cases and dates dictionary \n \n")
     print(date_tc_outcome_dict)
     print("print: specific date of the dictionary")
-    print(date_tc_outcome_dict[project_dates[0]])
+    print(date_tc_outcome_dict[analyzer.project_dates[0]])
     print("print: result dict \n \n")
     print(outcome_df)
 
