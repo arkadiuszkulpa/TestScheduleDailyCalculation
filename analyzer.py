@@ -4,20 +4,15 @@ import pandas as pd
 class Analyzer():
     """Analyze Data from the Test Schedule"""
 
-    def __init__(self, filePath, history_worksheet_name,):
+    def __init__(self, filePath, history_worksheet_name, relationship_worksheet_name):
         """initialize with history_Worksheet"""
         self.file_path = filePath
         self.history = pd.read_excel(filePath, 
         sheet_name=history_worksheet_name, engine='openpyxl')
         self.project_dates = []
-
-    def trim_data(self):
-        """Trim to only required columns, perform after rename"""
-        self.history = self.history[[
-            'Date',
-            'Outcome',
-            'TestCaseID'
-        ]]
+        # Load the 'Relationship Download' sheet
+        self.relationship = pd.read_excel(filePath, sheet_name=relationship_worksheet_name, engine='openpyxl')
+        self.alltcs = []
 
     def convert_date_to_datetime(self, date_column):
         """Convert date to datetime format"""
@@ -41,7 +36,15 @@ class Analyzer():
         self.history = self.history.dropna(subset=['TestCaseID'])
         self.history['TestCaseID'] = self.history['TestCaseID'].astype(int)
         self.history['Outcome'] = self.history['Outcome'].fillna('Active')
-        
+
+    def trim_history_data(self):
+        """Trim to only required columns, perform after rename"""
+        self.history = self.history[[
+            'Date',
+            'Outcome',
+            'TestCaseID'
+        ]]
+
     def generate_project_dates(self):
         """Generates a list range of dates from min max of the entries in history_worksheet"""
         # Calculate the start and finish dates
@@ -50,3 +53,7 @@ class Analyzer():
 
         # Generate all dates between the start and finish dates
         self.project_dates = pd.date_range(start_date, finish_date)
+
+    def identify_all_tcs(self):
+        """Saves a set of all TCs in the project to alltcs"""
+        self.alltcs = self.relationship[self.relationship['Work Item Type'] == 'Test Case']

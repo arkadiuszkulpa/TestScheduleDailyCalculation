@@ -60,7 +60,7 @@ for file_path in app.tk.splitlist(file_paths):
     output_file_path = os.path.join(dir_name, output_file_name)
 
     #Load the Excel file
-    analyzer = Analyzer(file_path, "History_Worksheet")
+    analyzer = Analyzer(file_path, 'History_Worksheet', 'Relationship Download')
 
     #DATA CLEANUP
     #Convert Date to datetime
@@ -72,23 +72,23 @@ for file_path in app.tk.splitlist(file_paths):
 
     #Standardize Test Case ID Column
     analyzer.standardize_columns()
-    analyzer.trim_data()
+    analyzer.trim_history_data()
     analyzer.generate_project_dates()
 
     #Temp assignment for ongoing changes to OOP
     history_worksheet = analyzer.history
 
-    # Load the 'Relationship Download' sheet
-    relationship_download = pd.read_excel(file_path, sheet_name='Relationship Download', engine='openpyxl')
-
     # Filter the 'ID' column by 'Test Case' in the 'Work Item Type' column
-    all_tcs = relationship_download[relationship_download['Work Item Type'] == 'Test Case']
 
-    all_tcs['ID'] = all_tcs['ID'].astype(int)
-    all_tcs = all_tcs[['ID', 'Outcome']]
+    analyzer.identify_all_tcs()
+
+    relationship_download = analyzer.relationship
+
+    analyzer.alltcs['ID'] = analyzer.alltcs['ID'].astype(int)
+    analyzer.alltcs = analyzer.alltcs[['ID', 'Outcome']]
 
 
-    tc_dict = all_tcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
+    tc_dict = analyzer.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
     
     outcome_set = {"Active", "NotApplicable", "Blocked", "Failed", "Passed"}
     project_outcomes = []
