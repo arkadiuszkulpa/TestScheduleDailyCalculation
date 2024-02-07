@@ -62,16 +62,19 @@ for file_path in app.tk.splitlist(file_paths):
     #Load the Excel file
     analyzer = Analyzer(file_path, "History_Worksheet")
 
-    #Data Cleanup
+    #DATA CLEANUP
+    #Convert Date to datetime
     analyzer.convert_date_to_datetime('Date')
 
+    #Rename Columns
     analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.outcome', 'Outcome')
     analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.testCase.id', 'TestCaseID')
-    
-    history_worksheet = analyzer.history
 
-    # Convert non-numeric values to NaN
-    history_worksheet['TestCaseID'] = pd.to_numeric(history_worksheet['TestCaseID'], errors='coerce')
+    #Standardize Test Case ID Column
+    analyzer.standardize_testcaseid()
+
+    #Temp assignment for ongoing changes to OOP
+    history_worksheet = analyzer.history
 
     # Remove rows with NaN values in 'TestCaseID' column
     history_worksheet = history_worksheet.dropna(subset=['TestCaseID'])

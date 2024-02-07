@@ -12,7 +12,7 @@ class Analyzer():
 
     def convert_date_to_datetime(self, date_column):
         """Convert date to datetime format"""
-        self.history[date_column] = pd.to_datetime(self.history['Date'])
+        self.history[date_column] = pd.to_datetime(self.history[date_column])
 
     def rename_history_columns(self, old_name, new_name):
         """Change Column name, string, string"""
@@ -26,4 +26,6 @@ class Analyzer():
                 old_name: new_name
             })
         
-    
+    def standardize_testcaseid(self):
+        """Standardize Test Case ID"""
+        self.history['TestCaseID'] = pd.to_numeric(self.history['TestCaseID'], errors='coerce')
