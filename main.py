@@ -76,12 +76,6 @@ for file_path in app.tk.splitlist(file_paths):
     #Temp assignment for ongoing changes to OOP
     history_worksheet = analyzer.history
 
-    # Remove rows with NaN values in 'TestCaseID' column
-    history_worksheet = history_worksheet.dropna(subset=['TestCaseID'])
-
-    # Convert 'TestCaseID' to integer
-    history_worksheet['TestCaseID'] = history_worksheet['TestCaseID'].astype(int)
-
     history_worksheet['Outcome'] = history_worksheet['Outcome'].fillna('Active')
 
     history_worksheet = history_worksheet[[

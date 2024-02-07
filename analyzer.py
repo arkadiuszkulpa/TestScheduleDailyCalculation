@@ -29,3 +29,5 @@ class Analyzer():
     def standardize_testcaseid(self):
         """Standardize Test Case ID"""
         self.history['TestCaseID'] = pd.to_numeric(self.history['TestCaseID'], errors='coerce')
+        self.history = self.history.dropna(subset=['TestCaseID'])
+        self.history['TestCaseID'] = self.history['TestCaseID'].astype(int)
