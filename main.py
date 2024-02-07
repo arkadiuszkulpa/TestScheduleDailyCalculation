@@ -59,15 +59,16 @@ for file_path in app.tk.splitlist(file_paths):
     output_file_name = os.path.splitext(base_name)[0] + ' - Daily Outcomes.csv'
     output_file_path = os.path.join(dir_name, output_file_name)
 
+    #Load the Excel file
     analyzer = Analyzer(file_path, "History_Worksheet")
-    analyzer.convert_date_to_datetime()
-    history_worksheet = analyzer.history
+
+    #Data Cleanup
+    analyzer.convert_date_to_datetime('Date')
+
+    analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.outcome', 'Outcome')
+    analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.testCase.id', 'TestCaseID')
     
-    # Simplify the History_worksheet dataset to contain only Date, Outcome, Test Case ID
-    history_worksheet = history_worksheet.rename(columns={
-        'SpecificRuns1WeekOutcome.Outcome.Column1.outcome': 'Outcome',
-        'SpecificRuns1WeekOutcome.Outcome.Column1.testCase.id': 'TestCaseID'
-    })
+    history_worksheet = analyzer.history
 
     # Convert non-numeric values to NaN
     history_worksheet['TestCaseID'] = pd.to_numeric(history_worksheet['TestCaseID'], errors='coerce')
