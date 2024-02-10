@@ -16,6 +16,7 @@ class Analyzer():
         self.tc_dict = []
         self.outcome_set = sorted(list({"Active", "NotApplicable", "Blocked", "Failed", "Passed"}))
         self.project_outcomes = []
+        self.date_tc_outcome_dict = {}
 
     def convert_date_to_datetime(self, date_column):
         """Convert date to datetime format"""
@@ -70,5 +71,6 @@ class Analyzer():
     def set_all_active(self):
         self.tc_dict = self.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
 
-    #def analyze_outcomes(self):
-        
+    def analyze_outcomes(self):
+        for date in self.project_dates:
+            self.date_tc_outcome_dict[date] = self.tc_dict

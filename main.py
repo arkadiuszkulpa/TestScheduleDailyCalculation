@@ -36,16 +36,16 @@ def process_outcomes():
         tc_dict_instance[tc_id] = outcome
 
         # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
-        date_tc_outcome_dict[date] = tc_dict_instance.copy()
+        analyzer.date_tc_outcome_dict[date] = tc_dict_instance.copy()
 
     #output an outcome count table
     result_dict = {}
 
-    for date in date_tc_outcome_dict:
-        result_dict[date] = {outcome: 0 for outcome in outcome_set}
+    for date in analyzer.date_tc_outcome_dict:
+        result_dict[date] = {outcome: 0 for outcome in analyzer.outcome_set}
 
-        for tc_id, outcome in date_tc_outcome_dict[date].items():
-            if outcome in outcome_set:
+        for tc_id, outcome in analyzer.date_tc_outcome_dict[date].items():
+            if outcome in analyzer.outcome_set:
                 result_dict[date][outcome] += 1
     return result_dict
 
@@ -84,20 +84,10 @@ for file_path in app.tk.splitlist(file_paths):
     analyzer.standardize_rel_columns()
     analyzer.trim_relationship_data()
     analyzer.set_all_active()
+    analyzer.analyze_outcomes()
 
     relationship_download = analyzer.relationship
 
-
-    
-    outcome_set = sorted(list({"Active", "NotApplicable", "Blocked", "Failed", "Passed"}))
-
-    project_outcomes = []
-
-    date_tc_outcome_dict = {}
-
-    for date in analyzer.project_dates:
-        date_tc_outcome_dict[date] = analyzer.tc_dict
-    
     outcome_df = pd.DataFrame(process_outcomes()).T
 
     # TODO : Implement Team's sharepoint connectivity
@@ -105,16 +95,16 @@ for file_path in app.tk.splitlist(file_paths):
     # TODO : organize the analyzer around actual project dates so that empty execution dates are saved correctly using previous day's data
     
 
-    print("print: dates dictionary \n \n")
-    print(analyzer.project_dates)
-    print("print: all test cases dictionary \n \n")
-    print(analyzer.tc_dict)
-    print("print: all test cases and dates dictionary \n \n")
-    print(date_tc_outcome_dict)
-    print("print: specific date of the dictionary")
-    print(date_tc_outcome_dict[analyzer.project_dates[0]])
-    print("print: result dict \n \n")
-    print(outcome_df)
+    # print("print: dates dictionary \n \n")
+    # print(analyzer.project_dates)
+    # print("print: all test cases dictionary \n \n")
+    # print(analyzer.tc_dict)
+    # print("print: all test cases and dates dictionary \n \n")
+    # print(date_tc_outcome_dict)
+    # print("print: specific date of the dictionary")
+    # print(date_tc_outcome_dict[analyzer.project_dates[0]])
+    # print("print: result dict \n \n")
+    # print(outcome_df)
 
     try:
         # Save the outcome dataframe to a CSV file
