@@ -88,7 +88,7 @@ for file_path in app.tk.splitlist(file_paths):
 
     relationship_download = analyzer.relationship
 
-    outcome_df = pd.DataFrame(process_outcomes()).T
+    outcome_df = pd.DataFrame(analyzer.analyze_outcomes()).T
 
     # TODO : Implement Team's sharepoint connectivity
     # TODO : Validate which columns get created first in the outcome_df
