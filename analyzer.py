@@ -82,18 +82,23 @@ class Analyzer():
         # Create an instance of tc_dict
         tc_dict_instance = self.tc_dict.copy()
 
-        for index, row in self.history.iterrows():
-            date = row['Date']
-            tc_id = row['TestCaseID']
-            outcome = row['Outcome']
+        for date in self.project_dates:
+            # Filter history for entries that match the current date
+            history_for_date = self.history[self.history['Date'] == date]
 
-            # Update the tc_dict instance
-            tc_dict_instance[tc_id] = outcome
+            for index, row in history_for_date.iterrows():
+                date = row['Date']
+                tc_id = row['TestCaseID']
+                outcome = row['Outcome']
+
+                # Update the tc_dict instance
+                tc_dict_instance[tc_id] = outcome
 
             # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
             self.date_tc_outcome_dict[date] = tc_dict_instance.copy()
-
-        #output an outcome count table
+    
+    def output_outcome_table(self):
+        """Outputs an outcome count table for each date"""
         result_dict = {}
 
         for date in self.date_tc_outcome_dict:
