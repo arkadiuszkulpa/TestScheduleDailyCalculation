@@ -68,11 +68,11 @@ class Analyzer():
     
     def trim_relationship_data(self):
         """trim the data to only relevant columns"""
-        self.alltcs = self.alltcs[['ID', 'Outcome']]
+        self.alltcs = self.alltcs[['ID', 'Outcome', 'TC Complexity', 'Priority']]
 
     def set_all_active(self):
         """Set all test cases to Active"""
-        self.tc_dict = self.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
+        self.tc_dict = self.alltcs.set_index('ID').assign(Outcome='Active').to_dict('index')
         for date in self.project_dates:
             self.date_tc_outcome_dict[date] = self.tc_dict.copy()
 
@@ -101,10 +101,10 @@ class Analyzer():
         """Outputs an outcome count table for each date"""
         result_dict = {}
 
-        for date in self.date_tc_outcome_dict:
+        for date, tc_outcome_dict in self.date_tc_outcome_dict.items():
             result_dict[date] = {outcome: 0 for outcome in self.outcome_set}
 
-            for tc_id, outcome in self.date_tc_outcome_dict[date].items():
+            for tc_id, outcome in tc_outcome_dict.items():
                 if outcome in self.outcome_set:
                     result_dict[date][outcome] += 1
         return result_dict
