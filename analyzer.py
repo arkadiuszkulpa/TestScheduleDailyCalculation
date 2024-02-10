@@ -13,6 +13,9 @@ class Analyzer():
         # Load the 'Relationship Download' sheet
         self.relationship = pd.read_excel(filePath, sheet_name=relationship_worksheet_name, engine='openpyxl')
         self.alltcs = []
+        self.tc_dict = []
+        self.outcome_set = sorted(list({"Active", "NotApplicable", "Blocked", "Failed", "Passed"}))
+        self.project_outcomes = []
 
     def convert_date_to_datetime(self, date_column):
         """Convert date to datetime format"""
@@ -57,3 +60,15 @@ class Analyzer():
     def identify_all_tcs(self):
         """Saves a set of all TCs in the project to alltcs"""
         self.alltcs = self.relationship[self.relationship['Work Item Type'] == 'Test Case']
+
+    def standardize_rel_columns(self):
+        self.alltcs['ID'] = self.alltcs['ID'].astype(int)
+    
+    def trim_relationship_data(self):
+        self.alltcs = self.alltcs[['ID', 'Outcome']]
+
+    def set_all_active(self):
+        self.tc_dict = self.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
+
+    #def analyze_outcomes(self):
+        

@@ -25,7 +25,7 @@ file_paths = app.open_files()
 def process_outcomes():
     """calculate daily outcomes for each day and save a sum of outcomes for each day separately"""
     # Create an instance of tc_dict
-    tc_dict_instance = tc_dict.copy()
+    tc_dict_instance = analyzer.tc_dict.copy()
 
     for index, row in history_worksheet.iterrows():
         date = row['Date']
@@ -81,14 +81,13 @@ for file_path in app.tk.splitlist(file_paths):
     # Filter the 'ID' column by 'Test Case' in the 'Work Item Type' column
 
     analyzer.identify_all_tcs()
+    analyzer.standardize_rel_columns()
+    analyzer.trim_relationship_data()
+    analyzer.set_all_active()
 
     relationship_download = analyzer.relationship
 
-    analyzer.alltcs['ID'] = analyzer.alltcs['ID'].astype(int)
-    analyzer.alltcs = analyzer.alltcs[['ID', 'Outcome']]
 
-
-    tc_dict = analyzer.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
     
     outcome_set = sorted(list({"Active", "NotApplicable", "Blocked", "Failed", "Passed"}))
 
@@ -97,7 +96,7 @@ for file_path in app.tk.splitlist(file_paths):
     date_tc_outcome_dict = {}
 
     for date in analyzer.project_dates:
-        date_tc_outcome_dict[date] = tc_dict
+        date_tc_outcome_dict[date] = analyzer.tc_dict
     
     outcome_df = pd.DataFrame(process_outcomes()).T
 
@@ -109,7 +108,7 @@ for file_path in app.tk.splitlist(file_paths):
     print("print: dates dictionary \n \n")
     print(analyzer.project_dates)
     print("print: all test cases dictionary \n \n")
-    print(tc_dict)
+    print(analyzer.tc_dict)
     print("print: all test cases and dates dictionary \n \n")
     print(date_tc_outcome_dict)
     print("print: specific date of the dictionary")
