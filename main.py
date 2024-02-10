@@ -16,14 +16,6 @@ file_paths = app.open_files()
 
 for file_path in app.tk.splitlist(file_paths):
 
-    # Get the directory and the base name of the selected file
-    dir_name = os.path.dirname(file_path)
-    base_name = os.path.basename(file_path)
-
-    # Construct the output file name
-    output_file_name = os.path.splitext(base_name)[0] + ' - Daily Outcomes.csv'
-    output_file_path = os.path.join(dir_name, output_file_name)
-
     #Load the Excel file
     analyzer = Analyzer(file_path, 'History_Worksheet', 'Relationship Download')
 
@@ -73,7 +65,7 @@ for file_path in app.tk.splitlist(file_paths):
 
     try:
         # Save the outcome dataframe to a CSV file
-        outcome_df.to_csv(output_file_path, index_label='Date')
+        outcome_df.to_csv(util.construct_output_file_path(file_path), index_label='Date')
         #history_worksheet.to_csv('history_worksheet.csv', index=False)
 
         # Create a simple pop-up window that confirms the completion of the task
