@@ -19,31 +19,20 @@ for file_path in app.tk.splitlist(file_paths):
     #Load the Excel file
     analyzer = Analyzer(file_path, 'History_Worksheet', 'Relationship Download')
 
-    #DATA CLEANUP
-    #Convert Date to datetime
+    #History Data Cleanup
     analyzer.convert_date_to_datetime('Date')
-
-    #Rename Columns
     analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.outcome', 'Outcome')
     analyzer.rename_history_columns('SpecificRuns1WeekOutcome.Outcome.Column1.testCase.id', 'TestCaseID')
-
-    #Standardize Test Case ID Column
     analyzer.standardize_columns()
     analyzer.trim_history_data()
     analyzer.generate_project_dates()
 
-    #Temp assignment for ongoing changes to OOP
-    history_worksheet = analyzer.history
-
-    # Filter the 'ID' column by 'Test Case' in the 'Work Item Type' column
-
+    #Relationship Data cleanup
     analyzer.identify_all_tcs()
     analyzer.standardize_rel_columns()
     analyzer.trim_relationship_data()
     analyzer.set_all_active()
     analyzer.analyze_outcomes()
-
-    relationship_download = analyzer.relationship
 
     outcome_df = pd.DataFrame(analyzer.analyze_outcomes()).T
 
