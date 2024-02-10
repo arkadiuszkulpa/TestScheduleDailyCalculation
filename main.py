@@ -34,7 +34,7 @@ for file_path in app.tk.splitlist(file_paths):
     analyzer.set_all_active()
     analyzer.analyze_outcomes()
 
-    outcome_df = pd.DataFrame(analyzer.analyze_outcomes()).T
+    outcome_df = pd.DataFrame(analyzer.output_outcome_table()).T
 
     # TODO : Implement Team's sharepoint connectivity
     # TODO : Validate which columns get created first in the outcome_df
