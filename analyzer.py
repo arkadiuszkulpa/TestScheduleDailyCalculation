@@ -73,11 +73,12 @@ class Analyzer():
     def set_all_active(self):
         """Set all test cases to Active"""
         self.tc_dict = self.alltcs.set_index('ID').assign(Outcome='Active')['Outcome'].to_dict()
+        for date in self.project_dates:
+            self.date_tc_outcome_dict[date] = self.tc_dict.copy()
 
     def analyze_outcomes(self):
         """Analyze Outcomes to output a dataframe"""
-        for date in self.project_dates:
-            self.date_tc_outcome_dict[date] = self.tc_dict
+        
         # Create an instance of tc_dict
         tc_dict_instance = self.tc_dict.copy()
 
