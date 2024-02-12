@@ -29,28 +29,16 @@ for file_path in app.tk.splitlist(file_paths):
 
     #Relationship Data cleanup
     analyzer.identify_all_tcs()
-    analyzer.standardize_rel_columns()
     analyzer.trim_relationship_data()
+    analyzer.standardize_rel_columns()
     analyzer.set_all_active()
     analyzer.analyze_outcomes()
 
-    outcome_df = pd.DataFrame(analyzer.output_outcome_table()).T
+    outcome_df = pd.DataFrame(analyzer.output_complex_outcome_table()).T
 
     # TODO : Implement Team's sharepoint connectivity
     # TODO : Validate which columns get created first in the outcome_df
     # TODO : organize the analyzer around actual project dates so that empty execution dates are saved correctly using previous day's data
-    
-
-    # print("print: dates dictionary \n \n")
-    # print(analyzer.project_dates)
-    # print("print: all test cases dictionary \n \n")
-    # print(analyzer.tc_dict)
-    # print("print: all test cases and dates dictionary \n \n")
-    # print(date_tc_outcome_dict)
-    # print("print: specific date of the dictionary")
-    # print(date_tc_outcome_dict[analyzer.project_dates[0]])
-    # print("print: result dict \n \n")
-    # print(outcome_df)
 
     try:
         # Save the outcome dataframe to a CSV file

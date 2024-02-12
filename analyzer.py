@@ -1,5 +1,5 @@
 import pandas as pd
-
+import copy
 
 class Analyzer():
     """Analyze Data from the Test Schedule"""
@@ -14,7 +14,7 @@ class Analyzer():
         self.relationship = pd.read_excel(filePath, sheet_name=relationship_worksheet_name, engine='openpyxl')
         self.alltcs = []
         self.tc_dict = []
-        self.outcome_set = sorted(list({"Active", "NotApplicable", "Blocked", "Failed", "Passed"}))
+        self.outcome_set = sorted(list({"Active", "Paused", "NotApplicable", "Blocked", "Failed", "Passed"}))
         self.project_outcomes = []
         self.date_tc_outcome_dict = {}
 
@@ -61,20 +61,38 @@ class Analyzer():
     def identify_all_tcs(self):
         """Saves a set of all TCs in the project to alltcs"""
         self.alltcs = self.relationship[self.relationship['Work Item Type'] == 'Test Case']
+        print(f'identify_all_tcs: \n{self.alltcs}')
 
     def standardize_rel_columns(self):
         """turn ID column into Int from float"""
+        self.alltcs['ID'] = pd.to_numeric(self.alltcs['ID'], errors='coerce')
+        self.alltcs['TC Complexity'] = pd.to_numeric(self.alltcs['TC Complexity'], errors='coerce')
+        self.alltcs['Priority'] = pd.to_numeric(self.alltcs['Priority'], errors='coerce')
+
+        self.alltcs.dropna(subset=['ID'], inplace=True)
+        self.alltcs.dropna(subset=['TC Complexity'], inplace=True)
+        self.alltcs.dropna(subset=['Priority'], inplace=True)
+
         self.alltcs['ID'] = self.alltcs['ID'].astype(int)
+        self.alltcs['TC Complexity'] = self.alltcs['TC Complexity'].astype(int)
+        self.alltcs['Priority'] = self.alltcs['Priority'].astype(int)
+
+        print(f'standardize_rel_columns: \n{self.alltcs}')
     
     def trim_relationship_data(self):
         """trim the data to only relevant columns"""
         self.alltcs = self.alltcs[['ID', 'Outcome', 'TC Complexity', 'Priority']]
+        print(f'trim_relationship_data: \n{self.alltcs}')
 
     def set_all_active(self):
         """Set all test cases to Active"""
-        self.tc_dict = self.alltcs.set_index('ID').assign(Outcome='Active').to_dict('index')
+        self.alltcs.loc[:, 'Outcome'] = 'Active'
+        self.tc_dict = self.alltcs.set_index('ID').to_dict('index')
         for date in self.project_dates:
-            self.date_tc_outcome_dict[date] = self.tc_dict.copy()
+            self.date_tc_outcome_dict[date] = copy.deepcopy(self.tc_dict)
+        print(f'set_all_active - alltcs: \n{self.alltcs.iloc[0]}')
+        first_item_key, first_item_value = list(self.tc_dict.items())[0]
+        print(f'set_all_active - tc_dict: \n{first_item_key} , {first_item_value}')
 
     def analyze_outcomes(self):
         """Analyze Outcomes to output a dataframe"""
@@ -96,6 +114,8 @@ class Analyzer():
 
             # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
             self.date_tc_outcome_dict[date] = tc_dict_instance.copy()
+        first_item_key, first_item_value = list(self.date_tc_outcome_dict.items())[0]
+        print(f'analyze_outcomes - date_tc_outcome_dict: \n{first_item_key} , {first_item_value}')
     
     def output_outcome_table(self):
         """Outputs an outcome count table for each date"""
@@ -107,4 +127,24 @@ class Analyzer():
             for tc_id, outcome in tc_outcome_dict.items():
                 if outcome in self.outcome_set:
                     result_dict[date][outcome] += 1
+        print(f'output_outcome_table: {result_dict[0]}')
+        return result_dict
+    
+    def output_complex_outcome_table(self):
+        """Outputs a complex outcome count table for each date"""
+        result_dict = {}
+
+        for date, tc_dict in self.date_tc_outcome_dict.items():
+            result_dict[date] = {f"C{i}P{j}": {outcome: 0 for outcome in self.outcome_set} for i in range(1, 5) for j in range(1, 5)}
+            result_dict[date].update({outcome: 0 for outcome in self.outcome_set})
+
+            for tc_id, tc_attributes in tc_dict.items():
+                print(f"tc_id: {tc_id}, type: {type(tc_attributes)}, value: {tc_attributes}")
+                complexity_priority_key = f"C{tc_attributes['TC Complexity']}P{tc_attributes['Priority']}"
+                outcome = tc_attributes['Outcome']
+
+                if outcome in self.outcome_set:
+                    result_dict[date][complexity_priority_key][outcome] += 1
+                    result_dict[date][outcome] += 1
+        print(f'output_outcome_table: {result_dict[0]}')
         return result_dict
