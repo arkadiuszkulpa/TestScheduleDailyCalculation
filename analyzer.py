@@ -13,6 +13,7 @@ class Analyzer():
         # Load the 'Relationship Download' sheet
         self.relationship = pd.read_excel(filePath, sheet_name=relationship_worksheet_name, engine='openpyxl')
         self.alltcs = []
+        self.removedTCs = []
         self.tc_dict = []
         self.outcome_set = sorted(list({"Active", "Paused", "NotApplicable", "Blocked", "Failed", "Passed"}))
         self.project_outcomes = []
@@ -98,7 +99,7 @@ class Analyzer():
         """Analyze Outcomes to output a dataframe"""
         
         # Create an instance of tc_dict
-        tc_dict_instance = self.tc_dict.copy()
+        tc_dict_instance = copy.deepcopy(self.tc_dict)
 
         for date in self.project_dates:
             # Filter history for entries that match the current date
@@ -109,13 +110,18 @@ class Analyzer():
                 tc_id = row['TestCaseID']
                 outcome = row['Outcome']
 
-                # Update the tc_dict instance
-                tc_dict_instance[tc_id] = outcome
+                # Check if tc_id is a key in tc_dict_instance
+                if tc_id not in tc_dict_instance:
+                    # If not, add it to self.removedTCs
+                    self.removedTCs.append(tc_id)
+                else:
+                    # Update the 'Outcome' field of the dictionary at tc_dict_instance[tc_id]
+                    tc_dict_instance[tc_id]['Outcome'] = outcome
 
             # Replace the tc_dict in date_tc_outcome_dict with the updated tc_dict instance
-            self.date_tc_outcome_dict[date] = tc_dict_instance.copy()
-        first_item_key, first_item_value = list(self.date_tc_outcome_dict.items())[0]
-        print(f'analyze_outcomes - date_tc_outcome_dict: \n{first_item_key} , {first_item_value}')
+            self.date_tc_outcome_dict[date] = copy.deepcopy(tc_dict_instance)
+        # first_item_key, first_item_value = list(self.date_tc_outcome_dict.items())[0]
+        # print(f'analyze_outcomes - date_tc_outcome_dict: \n{first_item_key} , {first_item_value}')
     
     def output_outcome_table(self):
         """Outputs an outcome count table for each date"""
@@ -135,8 +141,8 @@ class Analyzer():
         result_dict = {}
 
         for date, tc_dict in self.date_tc_outcome_dict.items():
-            result_dict[date] = {f"C{i}P{j}": {outcome: 0 for outcome in self.outcome_set} for i in range(1, 5) for j in range(1, 5)}
-            result_dict[date].update({outcome: 0 for outcome in self.outcome_set})
+            result_dict[date] = {f"C{i}P{j} - {outcome}": 0 for i in range(1, 5) for j in range(1, 5) for outcome in self.outcome_set}
+            result_dict[date].update({f"{outcome}": 0 for outcome in self.outcome_set})
 
             for tc_id, tc_attributes in tc_dict.items():
                 print(f"tc_id: {tc_id}, type: {type(tc_attributes)}, value: {tc_attributes}")
@@ -144,7 +150,6 @@ class Analyzer():
                 outcome = tc_attributes['Outcome']
 
                 if outcome in self.outcome_set:
-                    result_dict[date][complexity_priority_key][outcome] += 1
+                    result_dict[date][f"{complexity_priority_key} - {outcome}"] += 1
                     result_dict[date][outcome] += 1
-        print(f'output_outcome_table: {result_dict[0]}')
         return result_dict
