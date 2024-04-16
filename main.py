@@ -1,9 +1,10 @@
-import util
-import os
-
-from tkinter import filedialog, messagebox, Toplevel
-import pandas as pd
+from tkinter import messagebox
 import tkinter as tk
+
+import pandas as pd
+import os
+import util
+import traceback
 
 from application import Application
 from analyzer import Analyzer
@@ -51,6 +52,9 @@ for file_path in app.tk.splitlist(file_paths):
         # messagebox.showerror("Error", str(e))
         # root.mainloop()  # Keep the terminal open until the messagebox is clicked
         # app.destroy()  # Destroy the main window
+        with open('error_log.txt', 'w') as f:
+            f.write(str(e))
+            f.write(traceback.format_exc())
         messagebox.showerror("error", str(e))
         app.destroy()  # Destroy the main window
 
